@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-internal class CashCardApplicationTests {
+internal class PokemonControllerTests {
 
     @Autowired
     lateinit var restTemplate: TestRestTemplate
