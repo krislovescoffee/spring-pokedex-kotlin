@@ -20,7 +20,7 @@ internal class PokemonControllerTests {
 
     @Test
     fun `WHEN get pokemon is called with a valid id THEN 200 ok is returned`() {
-        val response = restTemplate.getForEntity("/pokemon/1", String::class.java)
+        val response = restTemplate.getForEntity("/pokemon/100", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
     }
 
@@ -32,7 +32,7 @@ internal class PokemonControllerTests {
 
     @Test
     fun `WHEN get pokemon is called with a valid id THEN pokemon content is returned`() {
-        val response = restTemplate.getForEntity("/pokemon/1", String::class.java)
+        val response = restTemplate.getForEntity("/pokemon/100", String::class.java)
         val responseBody = JsonPath.parse(response.body)
 
         val name = responseBody.read<String>("$.name")
@@ -45,15 +45,8 @@ internal class PokemonControllerTests {
     }
 
     @Test
-    fun `WHEN post pokemon is called with a valid body THEN pokemon 201 is returned`() {
-        val pokemon = PokemonDto(1, "Schiggy", 60, 6.0)
-        val createResponse = restTemplate.postForEntity("/pokemon", pokemon, Void::class.java)
-        assertThat(createResponse.statusCode).isEqualTo(HttpStatus.OK)
-    }
-
-    @Test
     fun shouldCreateANewCashCard() {
-        val newPokemon = PokemonDto(1, "Schiggy", 60, 6.0)
+        val newPokemon = PokemonDto(null, "Schiggy", 60, 6.0)
         val createResponse = restTemplate.postForEntity("/pokemon", newPokemon, Void::class.java)
         assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
 
