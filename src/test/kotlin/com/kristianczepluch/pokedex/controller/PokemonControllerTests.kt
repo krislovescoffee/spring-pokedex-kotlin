@@ -1,6 +1,7 @@
 package com.kristianczepluch.pokedex.controller
 
 import com.jayway.jsonpath.JsonPath
+import net.minidev.json.JSONArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,7 +14,6 @@ import java.net.URI
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 internal class PokemonControllerTests {
 
     @Autowired
@@ -46,6 +46,7 @@ internal class PokemonControllerTests {
     }
 
     @Test
+    @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     fun shouldCreateANewCashCard() {
         val createResponse = restTemplate.postForEntity("/pokemon", SCHIGGY_TEST, Void::class.java)
         assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
@@ -53,5 +54,57 @@ internal class PokemonControllerTests {
         val locationOfNewCashCard: URI? = createResponse.headers.location
         val getResponse: ResponseEntity<String> = restTemplate.getForEntity(locationOfNewCashCard, String::class.java)
         assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
+    @Test
+    fun shouldReturnAllCashCardsWhenListIsRequested() {
+        val response = restTemplate.getForEntity("/pokemon", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+
+        val documentContext = JsonPath.parse(response.body)
+        val cashCardCount = documentContext.read<Int>("$.length()")
+        assertThat(cashCardCount).isEqualTo(3)
+
+        val ids: JSONArray = documentContext.read("$..id")
+        assertThat(ids).containsExactlyInAnyOrder(99, 100, 101)
+
+        val names: JSONArray = documentContext.read("$..name")
+        assertThat(names).containsExactlyInAnyOrder("Schiggy", "Bisasam", "Glumanda")
+    }
+
+    @Test
+    fun shouldReturnAPageOfCashCards() {
+        val response = restTemplate.getForEntity("/pokemon?page=0&size=1", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+
+        val documentContext = JsonPath.parse(response.body)
+        val page = documentContext.read<JSONArray>("$[*]")
+        assertThat(page.size).isEqualTo(1)
+    }
+
+    @Test
+    fun shouldReturnASortedPageOfCashCards() {
+        val response = restTemplate.getForEntity("/pokemon?page=0&size=1&sort=name,asc", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+
+        val documentContext = JsonPath.parse(response.body)
+        val read = documentContext.read<JSONArray>("$[*]")
+        assertThat(read.size).isEqualTo(1)
+
+        val amount = documentContext.read<String>("$[0].name")
+        assertThat(amount).isEqualTo("Bisasam")
+    }
+
+    @Test
+    fun shouldReturnASortedPageOfCashCardsWithNoParametersAndUseDefaultValues() {
+        val response = restTemplate.getForEntity("/pokemon", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+
+        val documentContext = JsonPath.parse(response.body)
+        val page = documentContext.read<JSONArray>("$[*]")
+        assertThat(page.size).isEqualTo(3)
+
+        val amounts = documentContext.read<JSONArray>("$..name")
+        assertThat(amounts).containsExactly("Bisasam", "Glumanda", "Schiggy")
     }
 }

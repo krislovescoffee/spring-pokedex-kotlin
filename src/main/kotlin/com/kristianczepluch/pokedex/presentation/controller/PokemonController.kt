@@ -2,6 +2,10 @@ package com.kristianczepluch.pokedex.presentation.controller
 
 import com.kristianczepluch.pokedex.data.repository.PokemonRepository
 import com.kristianczepluch.pokedex.presentation.model.PokemonDto
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
@@ -35,4 +39,17 @@ class PokemonController(
             .toUri()
         return ResponseEntity.created(locationOfNewCashCard).build()
     }
+
+    @GetMapping
+    private fun findAll(pageable: Pageable): ResponseEntity<List<PokemonDto>> {
+        val page: Page<PokemonDto> = repository.findAll(
+            PageRequest.of(
+                pageable.pageNumber,
+                pageable.pageSize,
+                pageable.getSortOr(Sort.by(Sort.Direction.ASC, "name"))
+            )
+        )
+        return ResponseEntity.ok(page.content)
+    }
+
 }
