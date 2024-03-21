@@ -31,6 +31,9 @@ internal class PokemonJsonTest {
         assertThat(json.write(SCHIGGY_TEST)).hasJsonPathNumberValue("@.weightInKg")
         assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathNumberValue("@.weightInKg")
             .isEqualTo(SCHIGGY_TEST.weightInKg)
+        assertThat(json.write(SCHIGGY_TEST)).hasJsonPathStringValue("@.owner")
+        assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathStringValue("@.owner")
+            .isEqualTo(SCHIGGY_TEST.owner)
     }
 
     @Test
@@ -41,7 +44,8 @@ internal class PokemonJsonTest {
                 "id" : 99,
                 "name" : "Schiggy",
                 "heightInCm" : 60,
-                "weightInKg" : 6.0
+                "weightInKg" : 6.0,
+                "owner" : "Kristian"
             }
            """.trimIndent()
         assertThat(json.parse(pokemonJson))
@@ -50,6 +54,7 @@ internal class PokemonJsonTest {
         assertThat(json.parseObject(pokemonJson).name).isEqualTo("Schiggy")
         assertThat(json.parseObject(pokemonJson).heightInCm).isEqualTo(60)
         assertThat(json.parseObject(pokemonJson).weightInKg).isEqualTo(6.0)
+        assertThat(json.parseObject(pokemonJson).owner).isEqualTo("Kristian")
     }
 
     @Test
@@ -67,19 +72,22 @@ internal class PokemonJsonTest {
             "id" : 99,
             "name" : "Schiggy",
             "heightInCm" : 60,
-            "weightInKg" : 6.0
+            "weightInKg" : 6.0,
+            "owner" : "Kristian"
           },
           {
             "id" : 100,
             "name" : "Glumanda",
             "heightInCm" : 70,
-            "weightInKg" : 7.0
+            "weightInKg" : 7.0,
+            "owner" : "Kristian"
           },
           {
             "id" : 101,
             "name" : "Bisasam",
             "heightInCm" : 50,
-            "weightInKg" : 5.0
+            "weightInKg" : 5.0,
+            "owner" : "Kristian"
           }
         ]
          """.trimIndent()

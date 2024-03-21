@@ -2,5 +2,6 @@
   "id" : 99,
   "name" : "Schiggy",
   "heightInCm" : 60,
-  "weightInKg" : 6.0
+  "weightInKg" : 6.0,
+  "owner" : "Kristian"
 }

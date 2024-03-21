@@ -8,4 +8,5 @@ data class PokemonDto(
     val name: String,
     val heightInCm: Int,
     val weightInKg: Double,
+    val owner: String,
 )
