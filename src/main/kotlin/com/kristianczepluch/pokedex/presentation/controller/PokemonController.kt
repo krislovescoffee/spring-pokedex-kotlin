@@ -31,9 +31,11 @@ class PokemonController(
     @PostMapping
     private fun create(
         @RequestBody pokemonDto: PokemonDto,
-        ucb: UriComponentsBuilder
+        ucb: UriComponentsBuilder,
+        principal: Principal,
     ): ResponseEntity<Void> {
-        val savedPokemon = repository.save(pokemonDto)
+        val updatedPokemonDto = pokemonDto.copy(owner = principal.name)
+        val savedPokemon = repository.save(updatedPokemonDto)
         val locationOfNewCashCard: URI = ucb
             .path("pokemon/{id}")
             .buildAndExpand(savedPokemon.id)
