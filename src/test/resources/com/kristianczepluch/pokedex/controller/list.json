@@ -1,0 +1,20 @@
+[
+  {
+    "id" : 99,
+    "name" : "Schiggy",
+    "heightInCm" : 60,
+    "weightInKg" : 6.0
+  },
+  {
+    "id" : 100,
+    "name" : "Glumanda",
+    "heightInCm" : 70,
+    "weightInKg" : 7.0
+  },
+  {
+    "id" : 101,
+    "name" : "Bisasam",
+    "heightInCm" : 50,
+    "weightInKg" : 5.0
+  }
+]
