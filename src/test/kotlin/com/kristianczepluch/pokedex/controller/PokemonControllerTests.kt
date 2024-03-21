@@ -28,7 +28,7 @@ internal class PokemonControllerTests {
 
     @Test
     fun `WHEN get pokemon is called with a invalid id THEN 404 ok is returned`() {
-        val response = restTemplate.getForEntity("/pokemon/2", String::class.java)
+        val response = restTemplate.getForEntity("/pokemon/1000", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 
