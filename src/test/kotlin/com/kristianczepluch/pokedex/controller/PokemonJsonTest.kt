@@ -26,9 +26,11 @@ internal class PokemonJsonTest {
         assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathNumberValue("@.id").isEqualTo(SCHIGGY_TEST.id)
         assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathStringValue("@.name").isEqualTo(SCHIGGY_TEST.name)
         assertThat(json.write(SCHIGGY_TEST)).hasJsonPathNumberValue("@.heightInCm")
-        assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathNumberValue("@.heightInCm").isEqualTo(SCHIGGY_TEST.heightInCm)
+        assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathNumberValue("@.heightInCm")
+            .isEqualTo(SCHIGGY_TEST.heightInCm)
         assertThat(json.write(SCHIGGY_TEST)).hasJsonPathNumberValue("@.weightInKg")
-        assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathNumberValue("@.weightInKg").isEqualTo(SCHIGGY_TEST.weightInKg)
+        assertThat(json.write(SCHIGGY_TEST)).extractingJsonPathNumberValue("@.weightInKg")
+            .isEqualTo(SCHIGGY_TEST.weightInKg)
     }
 
     @Test
@@ -54,5 +56,33 @@ internal class PokemonJsonTest {
     @Throws(IOException::class)
     fun cashCardListSerializationTest() {
         assertThat(jsonList.write(POKEMON_TEST_LIST.toTypedArray())).isStrictlyEqualToJson("list.json")
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun cashCardListDeserializationTest() {
+        val expected = """
+        [
+          {
+            "id" : 99,
+            "name" : "Schiggy",
+            "heightInCm" : 60,
+            "weightInKg" : 6.0
+          },
+          {
+            "id" : 100,
+            "name" : "Glumanda",
+            "heightInCm" : 70,
+            "weightInKg" : 7.0
+          },
+          {
+            "id" : 101,
+            "name" : "Bisasam",
+            "heightInCm" : 50,
+            "weightInKg" : 5.0
+          }
+        ]
+         """.trimIndent()
+        assertThat(jsonList.parse(expected)).isEqualTo(POKEMON_TEST_LIST.toTypedArray())
     }
 }
