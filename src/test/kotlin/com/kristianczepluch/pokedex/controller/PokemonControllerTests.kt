@@ -1,7 +1,6 @@
 package com.kristianczepluch.pokedex.controller
 
 import com.jayway.jsonpath.JsonPath
-import com.kristianczepluch.pokedex.presentation.model.PokemonDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,8 +47,7 @@ internal class PokemonControllerTests {
 
     @Test
     fun shouldCreateANewCashCard() {
-        val newPokemon = PokemonDto(null, "Schiggy", 60, 6.0)
-        val createResponse = restTemplate.postForEntity("/pokemon", newPokemon, Void::class.java)
+        val createResponse = restTemplate.postForEntity("/pokemon", SCHIGGY_TEST, Void::class.java)
         assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
 
         val locationOfNewCashCard: URI? = createResponse.headers.location
