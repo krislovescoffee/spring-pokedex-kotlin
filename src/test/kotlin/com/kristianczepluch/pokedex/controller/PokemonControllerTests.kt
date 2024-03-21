@@ -21,19 +21,26 @@ internal class PokemonControllerTests {
 
     @Test
     fun `WHEN get pokemon is called with a valid id THEN 200 ok is returned`() {
-        val response = restTemplate.getForEntity("/pokemon/100", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon/100", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
     }
 
     @Test
     fun `WHEN get pokemon is called with a invalid id THEN 404 ok is returned`() {
-        val response = restTemplate.getForEntity("/pokemon/1000", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon/1000", String::class.java)
+
         assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 
     @Test
     fun `WHEN get pokemon is called with a valid id THEN pokemon content is returned`() {
-        val response = restTemplate.getForEntity("/pokemon/100", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon/100", String::class.java)
         val responseBody = JsonPath.parse(response.body)
 
         val name = responseBody.read<String>("$.name")
@@ -48,17 +55,23 @@ internal class PokemonControllerTests {
     @Test
     @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     fun shouldCreateANewCashCard() {
-        val createResponse = restTemplate.postForEntity("/pokemon", SCHIGGY_TEST, Void::class.java)
+        val createResponse = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .postForEntity("/pokemon", SCHIGGY_TEST, Void::class.java)
         assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
 
         val locationOfNewCashCard: URI? = createResponse.headers.location
-        val getResponse: ResponseEntity<String> = restTemplate.getForEntity(locationOfNewCashCard, String::class.java)
+        val getResponse: ResponseEntity<String> = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity(locationOfNewCashCard, String::class.java)
         assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
     }
 
     @Test
     fun shouldReturnAllCashCardsWhenListIsRequested() {
-        val response = restTemplate.getForEntity("/pokemon", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
         val documentContext = JsonPath.parse(response.body)
@@ -74,7 +87,9 @@ internal class PokemonControllerTests {
 
     @Test
     fun shouldReturnAPageOfCashCards() {
-        val response = restTemplate.getForEntity("/pokemon?page=0&size=1", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon?page=0&size=1", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
         val documentContext = JsonPath.parse(response.body)
@@ -84,7 +99,9 @@ internal class PokemonControllerTests {
 
     @Test
     fun shouldReturnASortedPageOfCashCards() {
-        val response = restTemplate.getForEntity("/pokemon?page=0&size=1&sort=name,asc", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon?page=0&size=1&sort=name,asc", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
         val documentContext = JsonPath.parse(response.body)
@@ -97,7 +114,9 @@ internal class PokemonControllerTests {
 
     @Test
     fun shouldReturnASortedPageOfCashCardsWithNoParametersAndUseDefaultValues() {
-        val response = restTemplate.getForEntity("/pokemon", String::class.java)
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
         val documentContext = JsonPath.parse(response.body)
@@ -106,5 +125,34 @@ internal class PokemonControllerTests {
 
         val amounts = documentContext.read<JSONArray>("$..name")
         assertThat(amounts).containsExactly("Bisasam", "Glumanda", "Schiggy")
+    }
+
+    @Test
+    fun shouldNotReturnACashCardWhenUsingBadCredentials() {
+        var response = restTemplate
+            .withBasicAuth("BAD-USER", "abc123")
+            .getForEntity("/pokemon", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+
+        response = restTemplate
+            .withBasicAuth("Kristian", "BAD-PASSWORD")
+            .getForEntity("/pokemon", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+
+    @Test
+    fun shouldRejectUsersWhoAreNotCardOwners() {
+        val response = restTemplate
+            .withBasicAuth("hank-owns-no-cards", "qrs456")
+            .getForEntity("/pokemon/99", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+    }
+
+    @Test
+    fun shouldNotAllowAccessToCashCardsTheyDoNotOwn() {
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon/102", String::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 }

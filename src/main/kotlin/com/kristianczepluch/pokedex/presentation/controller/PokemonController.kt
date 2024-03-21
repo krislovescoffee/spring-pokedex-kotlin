@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.security.Principal
 import kotlin.jvm.optionals.getOrNull
 
 
@@ -20,8 +21,8 @@ class PokemonController(
 ) {
 
     @GetMapping("/{id}")
-    private fun findById(@PathVariable id: Int): ResponseEntity<PokemonDto> {
-        val pokemon = repository.findById(id).getOrNull()
+    private fun findById(@PathVariable id: Int, principal: Principal): ResponseEntity<PokemonDto> {
+        val pokemon = repository.findByIdAndOwner(id, principal.name).getOrNull()
         return pokemon?.let { pokemonDto ->
             ResponseEntity.ok(pokemonDto)
         } ?: ResponseEntity.notFound().build()
@@ -41,8 +42,9 @@ class PokemonController(
     }
 
     @GetMapping
-    private fun findAll(pageable: Pageable): ResponseEntity<List<PokemonDto>> {
-        val page: Page<PokemonDto> = repository.findAll(
+    private fun findAll(pageable: Pageable, principal: Principal): ResponseEntity<List<PokemonDto>> {
+        val page: Page<PokemonDto> = repository.findByOwner(
+            principal.name,
             PageRequest.of(
                 pageable.pageNumber,
                 pageable.pageSize,
