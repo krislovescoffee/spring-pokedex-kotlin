@@ -10,4 +10,5 @@ import org.springframework.data.repository.PagingAndSortingRepository
 interface PokemonRepository : PagingAndSortingRepository<PokemonDto, Int>, CrudRepository<PokemonDto, Int> {
     fun findByIdAndOwner(id: Int, owner: String): PokemonDto?
     fun findByOwner(owner: String, pageRequest: PageRequest): Page<PokemonDto>
+    fun existsByIdAndOwner(id: Int, owner: String): Boolean
 }

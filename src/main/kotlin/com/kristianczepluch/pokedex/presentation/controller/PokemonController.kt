@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.security.Principal
-import kotlin.jvm.optionals.getOrNull
 
 
 @RestController
@@ -76,4 +75,13 @@ class PokemonController(
         } ?: return ResponseEntity.notFound().build()
     }
 
+    @DeleteMapping("/{id}")
+    private fun deleteById(@PathVariable id: Int, principal: Principal): ResponseEntity<PokemonDto> {
+        return if (repository.existsByIdAndOwner(id, principal.name)) {
+            repository.deleteById(id)
+            ResponseEntity.noContent()
+        } else {
+            ResponseEntity.notFound()
+        }.build()
+    }
 }

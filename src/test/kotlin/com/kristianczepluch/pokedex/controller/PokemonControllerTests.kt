@@ -202,4 +202,31 @@ internal class PokemonControllerTests {
         assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 
+    @Test
+    @DirtiesContext
+    fun shouldDeleteAnExistingCashCard() {
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .exchange("/pokemon/99", HttpMethod.DELETE, null, Void::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+
+        val getResponse = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon/99", String::class.java)
+        assertThat(getResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+    }
+
+    @Test
+    fun shouldNotAllowDeletionOfCashCardsTheyDoNotOwn() {
+        val deleteResponse: ResponseEntity<Void> = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .exchange("/pokemon/102", HttpMethod.DELETE, null, Void::class.java)
+        assertThat(deleteResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+
+        val getResponse = restTemplate
+            .withBasicAuth("Denise", "xyz789")
+            .getForEntity("/pokemon/102", String::class.java)
+        assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
 }
