@@ -22,7 +22,7 @@ class PokemonController(
 
     @GetMapping("/{id}")
     private fun findById(@PathVariable id: Int, principal: Principal): ResponseEntity<PokemonDto> {
-        val pokemon = repository.findByIdAndOwner(id, principal.name).getOrNull()
+        val pokemon = repository.findByIdAndOwner(id, principal.name)
         return pokemon?.let { pokemonDto ->
             ResponseEntity.ok(pokemonDto)
         } ?: ResponseEntity.notFound().build()
@@ -54,6 +54,26 @@ class PokemonController(
             )
         )
         return ResponseEntity.ok(page.content)
+    }
+
+    @PutMapping("/{requestedId}")
+    private fun put(
+        @PathVariable requestedId: Int,
+        @RequestBody pokemonDto: PokemonDto,
+        principal: Principal
+    ): ResponseEntity<Void> {
+        val updatedDto = repository.findByIdAndOwner(requestedId, principal.name)
+        updatedDto?.id?.let { id ->
+            val newPokemonDto = PokemonDto(
+                id,
+                pokemonDto.name,
+                pokemonDto.heightInCm,
+                pokemonDto.weightInKg,
+                principal.name,
+            )
+            repository.save(newPokemonDto)
+            return ResponseEntity.noContent().build()
+        } ?: return ResponseEntity.notFound().build()
     }
 
 }

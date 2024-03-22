@@ -1,12 +1,15 @@
 package com.kristianczepluch.pokedex.controller
 
 import com.jayway.jsonpath.JsonPath
+import com.kristianczepluch.pokedex.presentation.model.PokemonDto
 import net.minidev.json.JSONArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.test.annotation.DirtiesContext
@@ -155,4 +158,48 @@ internal class PokemonControllerTests {
             .getForEntity("/pokemon/102", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
+
+    @Test
+    @DirtiesContext
+    fun shouldUpdateAnExistingCashCard() {
+        val updatedName = "Schigggyy"
+        val cashCardUpdate = SCHIGGY_TEST.copy(name = updatedName)
+        val request = HttpEntity<PokemonDto>(cashCardUpdate)
+
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .exchange("/pokemon/99", HttpMethod.PUT, request, Void::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+
+        val getResponse = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .getForEntity("/pokemon/99", String::class.java)
+
+        assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
+
+        val documentContext = JsonPath.parse(getResponse.body)
+        val id = documentContext.read<Number>("$.id")
+        val name = documentContext.read<String>("$.name")
+        assertThat(id).isEqualTo(99)
+        assertThat(name).isEqualTo(updatedName)
+    }
+
+    @Test
+    fun shouldNotUpdateACashCardThatDoesNotExist() {
+        val request = HttpEntity(SCHIGGY_TEST.copy(id = 23))
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .exchange("/pokemon/23", HttpMethod.PUT, request, Void::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+    }
+
+    @Test
+    fun shouldNotUpdateACashCardThatIsOwnedBySomeoneElse() {
+        val request = HttpEntity(SCHIGGY_TEST.copy(id = 102))
+        val response = restTemplate
+            .withBasicAuth("Kristian", "abc123")
+            .exchange("/pokemon/102", HttpMethod.PUT, request, Void::class.java)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+    }
+
 }
