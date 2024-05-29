@@ -32,14 +32,14 @@ class PokemonController(
         @RequestBody pokemonDto: PokemonDto,
         ucb: UriComponentsBuilder,
         principal: Principal,
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<PokemonDto> {
         val updatedPokemonDto = pokemonDto.copy(owner = principal.name)
         val savedPokemon = repository.save(updatedPokemonDto)
         val locationOfNewCashCard: URI = ucb
             .path("pokemon/{id}")
             .buildAndExpand(savedPokemon.id)
             .toUri()
-        return ResponseEntity.created(locationOfNewCashCard).build()
+        return ResponseEntity.created(locationOfNewCashCard).body(savedPokemon)
     }
 
     @GetMapping
